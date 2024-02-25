@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Страница с товарами</title>
+		<style>
+			*{margin:0;padding:0}body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff;flex-direction:column}.main{background-color:#fff;border-radius:15px;box-shadow:0 0 20px rgba(0,0,0,0.2);padding:20px;transition:transform .2s;width:80%}.main:hover{transform:scale(1.008)}.gfg{display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#01940b}.custom-wrapper{margin:0;width:70%;padding:0 25px 40px;position:relative;left:63px}.header h2{font-size:30px;color:#01940b;display:flex;justify-content:center;padding:20px}.price-input-container,.brand-input-container,.name-input-container{width:100%}.price-input .price-filter,.brand-input .brand-filter,.name-input .name-filter{display:flex;margin-bottom:22px}.price-filter span,.name-filter span,.brand-filter span{margin-right:10px;margin-top:6px;font-size:17px}input{flex:1;height:35px;font-size:15px;font-family:"DM Sans",sans-serif;border-radius:9px;text-align:center;border:0;background:#e4e4e4}.price-input,.brand-input,.name-input{width:100%;font-size:19px;color:#555}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}@media screen and (max-width: 768px){.main{width:80%;margin-right:5px}.custom-wrapper{width:100%;left:0;padding:0 10px}.projtitle{width:100%;position:relative;right:26px}.price-input{flex-direction:column;align-items:center}.price-field{margin-bottom:10px}}div#products-container{display:flex;flex-direction:row;align-content:space-around;justify-content:center;align-items:stretch;flex-wrap:wrap}.loader{overflow:hidden;font-size:10px;margin:50px auto;text-indent:-9999em;width:11em;height:11em;border-radius:50%;background:#65abf8;background:-moz-linear-gradient(left,#65abf8 10%,rgba(101,171,248,0) 42%);background:-webkit-linear-gradient(left,#65abf8 10%,rgba(101,171,248,0) 42%);background:-o-linear-gradient(left,#65abf8 10%,rgba(101,171,248,0) 42%);background:-ms-linear-gradient(left,#65abf8 10%,rgba(101,171,248,0) 42%);background:linear-gradient(to right,#65abf8 10%,rgba(101,171,248,0) 42%);position:relative;-webkit-animation:load3 1.4s infinite linear;animation:load3 1.4s infinite linear;-webkit-transform:translateZ(0);-ms-transform:translateZ(0);transform:translateZ(0)}.loader:before{width:50%;height:50%;background:#65abf8;border-radius:100% 0 0 0;position:absolute;top:0;left:0;content:''}.loader:after{background:#fff;width:75%;height:75%;border-radius:50%;content:'';margin:auto;position:absolute;top:0;left:0;bottom:0;right:0}@-webkit-keyframes load3{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes load3{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}.bar{width:200px;display:flex;background:#fbfbfb;margin:.4%;padding:1%}.pagination{margin-top:20px;display:flex;justify-content:center}.pagination button{margin:0 5px;cursor:pointer}button#apply-filters-btn{appearance:none;background:#d2d2ff;border:0;padding:9px 62px;text-align:center;float:right;cursor:pointer;border-radius:7px}div#gameover{width:100%;text-align:center;font-size:25px}select#filter-type{min-width:270px;margin-bottom:19px;margin-top:8px;border-radius:5px;padding:8px 13px}
+		</style>
+	</head>
+	<body> 
+		<div class="main"> 
+			
+			<div class="custom-wrapper">  
+				
+				<div class="header"> 
+					<h2 class="projtitle"> 
+						Фильтр
+					</h2> 
+				</div> 
+				<select id="filter-type">
+					<option value="price">Фильтровать по цене</option>
+					<option value="brand">Фильтровать по бренду</option>
+					<option value="product">Фильтровать по названию товара</option>
+				</select>
+				<div class="price-input-container"> 
+					<div class="price-input"> 
+						<div class="price-filter"> 
+							<span>Цена</span> 
+							<input type="number" 
+							class="price-input" id="price-input" />
+						</div> 
+						
+					</div>  
+				</div> 
+				<div class="brand-input-container"> 
+					<div class="brand-input"> 
+						<div class="brand-filter"> 
+							<span>Brand (например Piaget)</span> 
+							<input type="text" 
+							class="brand-input" id="brand-input"/>
+						</div> 
+						
+					</div>  
+				</div>
+				<div class="name-input-container"> 
+					<div class="name-input"> 
+						<div class="name-filter"> 
+							<span>Название товара</span> 
+							<input type="text" 
+							class="name-input" id="product-input" />
+						</div> 
+						
+					</div>  
+				</div> 
+				
+				<button id="apply-filters-btn">Применить</button>
+				
+			</div> 
+			<div id="products-container"></div>
+			<div id="gameover" style=display:none>Товар не найден, обратитесь пожалуйста позже</div>
+			<div id="products-filterData"></div>
+			<div class="pagination"></div>
+			
+		</div>  
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+		
+		<script>
+			
+			const loader = document.getElementById("loader"); 
+			const gameOver = document.getElementById("gameover"); 
+			function generateXAuthHeader(password) {
+				const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+				const authString = `${password}_${timestamp}`;
+				return CryptoJS.MD5(authString);
+			}
+			async function loadProductsFirst() {
+				const apiUrl = 'http://api.valantis.store:40000/';
+				const password = 'Valantis';
+				
+				const filterRequestBody = {
+					action: 'get_ids',
+					params:{"offset": 0, "limit": 50}
+				};
+				
+				const xAuthHeader = generateXAuthHeader(password);
+				
+				try {
+					const filterResponse = await fetch(apiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${password}`,
+							'X-Auth': xAuthHeader
+						},
+						body: JSON.stringify(filterRequestBody)
+					});
+					
+					const filterData = await filterResponse.json();
+					
+					const ids = filterData.result;
+					
+					gameOver.style.display = "none";
+					await loadItemsDetails(ids);
+					} catch (error) {
+					
+					gameOver.style.display = "block";
+					//loader.style.display = "none";
+					console.error('Ошибка при первоначальной загрузке товаров:', error);
+				}
+			}
+			async function loadProducts(offset, limit) {
+				const apiUrl = 'http://api.valantis.store:40000/';
+				const password = 'Valantis';
+				
+				const filterRequestBody = {
+					action: 'get_ids',
+					params: { offset, limit }
+				};
+				
+				const xAuthHeader = generateXAuthHeader(password);
+				
+				try {
+					const filterResponse = await fetch(apiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${password}`,
+							'X-Auth': xAuthHeader
+						},
+						body: JSON.stringify(filterRequestBody)
+					});
+					
+					const filterData = await filterResponse.json();
+					
+					const ids = filterData.result;
+					gameOver.style.display = "none";
+					await loadItemsDetails(ids);
+					} catch (error) {
+					gameOver.style.display = "block";
+					loader.style.display = "none";
+					console.error('Ошибка при загрузке товаров:', error);
+				}
+			}
+			
+			async function loadItemsDetails(ids) {
+				showLoader();
+				const apiUrl = 'http://api.valantis.store:40000/';
+				const password = 'Valantis';
+				
+				const getItemsRequestBody = {
+					action: 'get_items',
+					params: { ids }
+				};
+				
+				const xAuthHeader = generateXAuthHeader(password);
+				
+				try {
+					const getItemsResponse = await fetch(apiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${password}`,
+							'X-Auth': xAuthHeader
+						},
+						body: JSON.stringify(getItemsRequestBody)
+					});
+					
+					const getItemsData = await getItemsResponse.json();
+					gameOver.style.display = "none";
+					displayProducts(getItemsData.result);
+					} catch (error) {
+					gameOver.style.display = "block";
+					loader.style.display = "none";
+					console.error('Ошибка при загрузке дополнительной информации о товарах:', error);
+				}
+			}
+			function getFilterType() {
+				return document.getElementById('filter-type').value;
+			}
+			
+			
+			async function applyFilters() {
+				const filterType = getFilterType();
+				const filterValue = document.getElementById(`${filterType}-input`).value;
+				
+				await loadFilteredProducts(filterType, filterValue);
+			}
+			
+			document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
+			
+			// функция для загрузки с учетом фильтров
+			async function loadFilteredProducts(filterType, filterValue) {
+				const apiUrl = 'http://api.valantis.store:40000/';
+				const password = 'Valantis';
+				console.log(filterType);
+				console.log(filterValue);
+				
+				const sanitizedFilterValue = isNaN(filterValue) ? filterValue : parseFloat(filterValue);
+				
+				
+				const filterRequestBody = {
+					action: 'filter',
+					params: {[filterType]: sanitizedFilterValue }
+				};
+				
+				const xAuthHeader = generateXAuthHeader(password);
+				
+				try {
+					const filterResponse = await fetch(apiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${password}`,
+							'X-Auth': xAuthHeader
+						},
+						body: JSON.stringify(filterRequestBody)
+					});
+					
+					const filterData = await filterResponse.json();
+					
+					const ids = filterData.result;
+					gameOver.style.display = "none";
+					await loadItemsDetails(ids);
+					} catch (error) {
+					gameOver.style.display = "block";
+					//loader.style.display = "none";
+					console.error('Ошибка при загрузке товаров с учетом фильтров:', error);
+				}
+			}
+			
+			
+			
+			function  showLoader() {
+				const productsContainer = document.getElementById('products-container');
+				
+				productsContainer.innerHTML = '<div class="loader" id="loader"></div>';
+			}
+			function displayProducts(products) {
+				const productsContainer = document.getElementById('products-container');
+				
+				productsContainer.innerHTML = '';
+				
+				products.forEach(product => {
+					const productElement = document.createElement('div');
+					productElement.classList.add('bar');
+					productElement.innerHTML = '<div><p>' + product.product + '</p><p>Цена: ' + product.price + '</p><p style=font-weight:700>' + (product.brand ? product.brand : '') + '</p></div>'; 
+					
+					productsContainer.appendChild(productElement);
+				});
+			}
+			
+			function setupPagination(totalPages) {
+				const paginationContainer = document.querySelector('.pagination');
+				paginationContainer.innerHTML = '';
+				
+				for (let i = 1; i <= totalPages; i++) {
+					const pageButton = document.createElement('button');
+					pageButton.textContent = i;
+					pageButton.addEventListener('click', () => loadProducts((i - 1) * 50, 50));  
+					paginationContainer.appendChild(pageButton);
+				}
+			}
+			
+			window.onload = () => { 
+				loadProductsFirst(); 
+				setupPagination(4); 
+			};
+		</script>
+		
+		
+		
+	</body>
+</html>
