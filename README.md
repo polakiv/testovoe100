@@ -1,3 +1,7 @@
+Демо выполненного задания 
+http://polakiv.theweb.place/index.html
+
+
 API v1.02
 
 Аутентификация запросов.
