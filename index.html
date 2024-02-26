@@ -18,6 +18,7 @@
 						Фильтр
 					</h2> 
 				</div> 
+				<!-- Если я правильно понял, фильтровать на этом сервере  можно только по одному параметру -->
 				<select id="filter-type">
 					<option value="price">Фильтровать по цене</option>
 					<option value="brand">Фильтровать по бренду</option>
@@ -70,11 +71,13 @@
 			
 			const loader = document.getElementById("loader"); 
 			const gameOver = document.getElementById("gameover"); 
+			// Авторизация
 			function generateXAuthHeader(password) {
 				const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
 				const authString = `${password}_${timestamp}`;
 				return CryptoJS.MD5(authString);
 			}
+			// Первая загрузка товара
 			async function loadProductsFirst() {
 				const apiUrl = 'http://api.valantis.store:40000/';
 				const password = 'Valantis';
@@ -110,6 +113,7 @@
 					console.error('Ошибка при первоначальной загрузке товаров:', error);
 				}
 			}
+			// загрузка при пагинации, в результате получение id товара
 			async function loadProducts(offset, limit) {
 				const apiUrl = 'http://api.valantis.store:40000/';
 				const password = 'Valantis';
@@ -143,7 +147,7 @@
 					console.error('Ошибка при загрузке товаров:', error);
 				}
 			}
-			
+			// передача id, получение товара
 			async function loadItemsDetails(ids) {
 				showLoader();
 				const apiUrl = 'http://api.valantis.store:40000/';
@@ -176,18 +180,19 @@
 					console.error('Ошибка при загрузке дополнительной информации о товарах:', error);
 				}
 			}
+			// смотрим выбранный селект 
 			function getFilterType() {
 				return document.getElementById('filter-type').value;
 			}
 			
-			
+			// смотрим инпуты в форме фильтра
 			async function applyFilters() {
 				const filterType = getFilterType();
 				const filterValue = document.getElementById(`${filterType}-input`).value;
 				
 				await loadFilteredProducts(filterType, filterValue);
 			}
-			
+			// кнопка принять в фильтре
 			document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
 			
 			// функция для загрузки с учетом фильтров
@@ -231,12 +236,13 @@
 			}
 			
 			
-			
+			// показать прелоадер
 			function  showLoader() {
 				const productsContainer = document.getElementById('products-container');
 				
 				productsContainer.innerHTML = '<div class="loader" id="loader"></div>';
 			}
+			// вывод товара , встраивание в страницу
 			function displayProducts(products) {
 				const productsContainer = document.getElementById('products-container');
 				
@@ -250,7 +256,7 @@
 					productsContainer.appendChild(productElement);
 				});
 			}
-			
+			// генерация 4 кнопок пагинации
 			function setupPagination(totalPages) {
 				const paginationContainer = document.querySelector('.pagination');
 				paginationContainer.innerHTML = '';
@@ -262,14 +268,11 @@
 					paginationContainer.appendChild(pageButton);
 				}
 			}
-			
+			// при загрузке BOM загружаем первый раз товар и устанавливаем пагинацию
 			window.onload = () => { 
 				loadProductsFirst(); 
 				setupPagination(4); 
 			};
-		</script>
-		
-		
-		
+		</script> 
 	</body>
 </html>
